@@ -18,6 +18,26 @@ import InputBox from "./components/InputBox/index.tsx";
 
 import Footer from "./layouts/Footer/index.tsx";
 
+import {Route, Routes} from "react-router-dom";
+import Main from "./views/Main/index.tsx";
+import Authentication from "./views/Authentication/index.tsx";
+import Search from "./views/Search/index.tsx";
+import User from "./views/User/index.tsx";
+import BoardDetail from "./views/Board/detail/index.tsx";
+import BoardWrite from "./views/Board/write/index.tsx";
+import BoardUpdate from "./views/Board/update/index.tsx";
+import Container from "./layouts/container/index.tsx";
+import {
+    AUTH_PATH,
+    BOARD_DEATIL_PATH,
+    BOARD_PATH, BOARD_UPDATE_PATH,
+    BOARD_WRITE_PATH,
+    MAIN_PATH,
+    SEARCH_PATH,
+    USER_PATH
+} from "./constant/index.ts";
+
+
 function App() {
 
     const [value, setValue] = useState<string>()
@@ -39,8 +59,22 @@ function App() {
 
         {/*<InputBox label='이메일' type='text' placeholder='이메일 주소를 입력해주세요.' value={value} error={false} setValue={setValue}/>*/}
 
-        <Footer />
+        {/*<Footer />*/}
 
+        <Routes>
+            <Route element={<Container />}>
+                <Route path={MAIN_PATH()} element={<Main />}></Route>
+                <Route path={AUTH_PATH()} element={<Authentication />}></Route>
+                <Route path={SEARCH_PATH(':searchWord')} element={<Search />}></Route>
+                <Route path={USER_PATH(':userEmail')} element={<User />}></Route>
+                <Route path={BOARD_PATH()}>
+                    <Route path={BOARD_DEATIL_PATH(':boardNumber')} element={<BoardDetail />} />
+                    <Route path={BOARD_WRITE_PATH()} element={<BoardWrite />} />
+                    <Route path={BOARD_UPDATE_PATH(':boardNumber')} element={<BoardUpdate />} />
+                </Route>
+                <Route path="*" element={<h1>404 Not Found</h1>} />
+            </Route>
+        </Routes>
     </>
   );
 }
