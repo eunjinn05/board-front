@@ -1,14 +1,16 @@
-import React, {useState, KeyboardEvent, useRef, ChangeEvent} from 'react';
+import React, {useState, KeyboardEvent, useRef, ChangeEvent, useEffect} from 'react';
 import './style.css';
 import InputBox from "../../components/InputBox/index.tsx";
 import {SignInRequestDto} from "../../apis/request/auth/index.ts";
-import {signInRequest} from "../../apis/index.ts";
+import {signInRequest, signUpRequest} from "../../apis/index.ts";
 import {ResponseDto} from "../../apis/response/index";
 import {useCookies} from "react-cookie";
 import {MAIN_PATH} from "../../constant/index.ts";
 import {useNavigate} from "react-router-dom";
 import { SignInResponseDto } from "../../apis/response/auth/index.ts"
 import {Address, useDaumPostcodePopup} from "react-daum-postcode";
+import {SignUpRequestDto} from "../../apis/request/auth";
+import {SignUpResponseDto} from "../../apis/response/auth";
 
 export default function Authentication() {
 
@@ -118,12 +120,12 @@ export default function Authentication() {
 
     const SignUpCard = () => {
 
-        const [page, setPage] = useState<1 | 2>(2);
+        const [page, setPage] = useState<1 | 2>(1);
         const [email, setEmail] = useState<string>('');
         const [password, setPassword] = useState<string>('');
         const [passwordCheck, setPasswordCheck] = useState<string>('');
-        const [passwordType, setPasswordType] = useState<'text' | 'password'>('text');
-        const [passwordCheckType, setPasswordCheckType] = useState<'text' | 'password'>('text');
+        const [passwordType, setPasswordType] = useState<'text' | 'password'>('password');
+        const [passwordCheckType, setPasswordCheckType] = useState<'text' | 'password'>('password');
         const [isEmailError, setEmailError] = useState<boolean>(false);
         const [ispasswordError, setPasswordError] = useState<boolean>(false);
         const [ispasswordCheckError, setPasswordCheckError] = useState<boolean>(false);
@@ -138,7 +140,7 @@ export default function Authentication() {
         const [address, setAddress] = useState<string>('');
         const [addressDetail, setAddressDetail] = useState<string>('');
         const [nicknameError, setNicknameError] = useState<boolean>(false);
-        const [telNumberError, setTelNumerError] = useState<boolean>(false);
+        const [telNumberError, setTelNumberError] = useState<boolean>(false);
         const [addressError, setAddressError] = useState<boolean>(false);
         const [addressDetailError, setAddressDetailError] = useState<boolean>(false);
         const [nicknameErrorMessage, setNicknameErrorMessage] = useState<string>('');
@@ -218,7 +220,7 @@ export default function Authentication() {
                 setEmailErrorMessage('이메일 주소 포맷이 맞지 않습니다.');
             }
 
-            const isCheckedPassword = password.trim().length > 8;
+            const isCheckedPassword = password.trim().length >= 8;
             if(!isCheckedPassword) {
                 setPasswordError(true);
                 setPasswordErrorMessage('비밀번호는 8자 이상 입력해주세요.');
@@ -229,14 +231,65 @@ export default function Authentication() {
                 setPasswordCheckError(true);
                 setPasswordCheckErrorMessage('비밀번호가 일치하지 않습니다.');
             }
-            if(!isEmailPattern || !isCheckedPassword || isEqualPassword) return false;
+            if(!isEmailPattern || !isCheckedPassword || !isEqualPassword) return false;
             setPage(2);
         }
         const onSignInLinkClickHandler = () => {
             setView('sign-in');
         }
         const onSignUpButtonClickHandler = () => {
+            const emailPattern = /^[a-zA-Z0-9]*@([-.]?[a-zA-Z0-9])*\.[a-zA-Z]{2,4}$/;
+            const isEmailPattern = emailPattern.test(email);
+            if(!isEmailPattern){
+                setEmailError(true);
+                setEmailErrorMessage('이메일 주소 포맷이 맞지 않습니다.');
+            }
 
+            const isCheckedPassword = password.trim().length >= 8;
+            if(!isCheckedPassword) {
+                setPasswordError(true);
+                setPasswordErrorMessage('비밀번호는 8자 이상 입력해주세요.');
+            }
+
+            const isEqualPassword = password === passwordCheck;
+            if(!isEqualPassword) {
+                setPasswordCheckError(true);
+                setPasswordCheckErrorMessage('비밀번호가 일치하지 않습니다.');
+            }
+            if(!isEmailPattern || !isCheckedPassword || !isEqualPassword) {
+                setPage(1);
+                return false;
+            }
+
+            const hasNickname = nickname.trim().length !== 0;
+            if (!hasNickname) {
+                setNicknameError(true);
+                setNicknameErrorMessage("닉네임을 입력해주세요");
+            }
+
+            const telNumberPattern = /^[0-9]{11,13}$/
+            const isTelNumberPattern = telNumberPattern.test(telNumber);
+            if (!isTelNumberPattern) {
+                setTelNumberError(true);
+                setTelNumberErrorMessage('숫자만 입력해주세요');
+            }
+
+            const hasAddress = address.trim().length !== 0;
+            if (!hasAddress) {
+                setAddressError(true);
+                setAddressErrorMessage('주소를 입력해주세요');
+            }
+
+            if (!agreedPersonal) {
+                setAgreedPersonalError(true);
+            }
+
+            if (!hasNickname || !isTelNumberPattern || !hasAddress) return false;
+
+            const requestBody: SignUpRequestDto = {
+                email, password, nickname, telNumber, address, addressDetail, agreedPersonal
+            };
+            signUpRequest(requestBody).then(signUpResponse);
         }
         const onNicknameChangeHandler = (e:ChangeEvent<HTMLInputElement>) => {
             const { value } = e.target;
@@ -247,7 +300,7 @@ export default function Authentication() {
         const onTelNumberChangeHandler = (e:ChangeEvent<HTMLInputElement>) => {
             const { value } = e.target;
             setTelNumber(value);
-            setTelNumerError(false);
+            setTelNumberError(false);
             setTelNumberErrorMessage('');
         }
         const onAddressChangeHandler = (e:ChangeEvent<HTMLInputElement>) => {
@@ -295,6 +348,41 @@ export default function Authentication() {
             addressDetailRef.current.focus();
         }
 
+        const signUpResponse = (responseBody:SignUpResponseDto | ResponseDto | null) => {
+            if (!responseBody) {
+                alert('네트워크 이상입니다.');
+                return false;
+            }
+            const {code} = responseBody;
+            if (code === "DE") {
+                setEmailError(true);
+                setEmailErrorMessage('중복되는 이메일 주소입니다.');
+                setPage(1);
+            }
+            if (code === 'DN') {
+                setNicknameError(true);
+                setNicknameErrorMessage('중복되는 닉네임입니다.');
+                setPage(1);
+            }
+            if (code === 'DT') {
+                setTelNumberError(true);
+                setTelNumberErrorMessage('중복되는 휴대폰 번호입니다.');
+                setPage(1);
+            }
+            if (code === 'VF') alert('모든 값을 입력하세요.');
+            if (code === "DBE") alert('데이터베이스 오류입니다.');
+
+            if (code !== 'SU') return false;
+            setView('sign-in');
+        }
+
+        useEffect(() => {
+            if(page === 2) {
+                if(!nicknameRef.current) return;
+                nicknameRef.current.focus();
+            }
+        }, [page]);
+
         return (
             <div className="auth-card">
                 <div className="auth-card-box">
@@ -331,10 +419,10 @@ export default function Authentication() {
                                            <div className={`icon ${agreedPersonal ? 'check-round-fill-icon' : 'check-ring-light-icon'}` } ></div>
                                             <div className="check-ring-light-icon"></div>
                                         </div>
-                                        <div className="{isAgreedPersonalError ? 'auth-consent-error' : 'auth-consent-title'}">개인정보동의</div>
+                                        <div className={isAgreedPersonalError ? 'auth-consent-error' : 'auth-consent-title'}>개인정보동의</div>
                                         <div className="auth-consent-link">{'더보기 > '}</div>
                                     </div>
-                                    <div className="black-large-full-botton" onClick={onSignUpButtonClickHandler}></div>
+                                    <div className="black-large-full-botton" onClick={onSignUpButtonClickHandler}>회원가입</div>
                                 </>
                             )}
                             <div className="auth-descript-box">
