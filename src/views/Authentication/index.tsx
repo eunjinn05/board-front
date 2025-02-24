@@ -284,7 +284,7 @@ export default function Authentication() {
                 setAgreedPersonalError(true);
             }
 
-            if (!hasNickname || !isTelNumberPattern || !hasAddress) return false;
+            if (!hasNickname || !isTelNumberPattern || !hasAddress || !agreedPersonal) return false;
 
             const requestBody: SignUpRequestDto = {
                 email, password, nickname, telNumber, address, addressDetail, agreedPersonal

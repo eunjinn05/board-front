@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 
 import BoardItem from "./components/BoardItem/index.tsx";
@@ -22,7 +22,7 @@ import {Route, Routes} from "react-router-dom";
 import Main from "./views/Main/index.tsx";
 import Authentication from "./views/Authentication/index.tsx";
 import Search from "./views/Search/index.tsx";
-import User from "./views/User/index.tsx";
+import UserP from "./views/User/index.tsx";
 import BoardDetail from "./views/Board/detail/index.tsx";
 import BoardWrite from "./views/Board/write/index.tsx";
 import BoardUpdate from "./views/Board/update/index.tsx";
@@ -36,11 +36,40 @@ import {
     SEARCH_PATH,
     USER_PATH
 } from "./constant/index.ts";
+import {useCookies} from "react-cookie";
+import {useLoginUserStore} from "./stores/index.ts";
+import {GetSignInUserResponseDto} from "./apis/response/user";
+import {ResponseDto} from "./apis/response";
+import {User} from "./types/interface";
+import {getSignInUserRequest} from "./apis/index.ts";
 
 
 function App() {
 
     const [value, setValue] = useState<string>()
+
+    const [cookies, setCookies] = useCookies();
+    const {setLoginUser, resetLoginUser} = useLoginUserStore();
+
+    useEffect(() => {
+        if (!cookies.accessToken) {
+            resetLoginUser();
+            return;
+        }
+        getSignInUserRequest(cookies.accessToken).then(getSignInUserResponse);
+    }, [cookies.accessToken]);
+
+    const getSignInUserResponse = (responseBody:GetSignInUserResponseDto | ResponseDto | null) => {
+        if (!responseBody) return false;
+        const code  = responseBody.code;
+        if (code === 'AF' || code === 'NU' || code === 'DBE') {
+            resetLoginUser();
+            return false;
+        }
+        const loginUser: User = { ...responseBody as GetSignInUserResponseDto };
+        setLoginUser(loginUser);
+    }
+
   return (
     <>
         {/*{latestBoardListMock.map(BoardListItem => <BoardItem boardListItem={BoardListItem} />)}*/}
@@ -66,7 +95,7 @@ function App() {
                 <Route path={MAIN_PATH()} element={<Main />}></Route>
                 <Route path={AUTH_PATH()} element={<Authentication />}></Route>
                 <Route path={SEARCH_PATH(':searchWord')} element={<Search />}></Route>
-                <Route path={USER_PATH(':userEmail')} element={<User />}></Route>
+                <Route path={USER_PATH(':userEmail')} element={<UserP />}></Route>
                 <Route path={BOARD_PATH()}>
                     <Route path={BOARD_DEATIL_PATH(':boardNumber')} element={<BoardDetail />} />
                     <Route path={BOARD_WRITE_PATH()} element={<BoardWrite />} />

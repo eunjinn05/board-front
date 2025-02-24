@@ -3,13 +3,13 @@ import {create} from "zustand/react";
 
 interface LoginUserStore {
     loginUser: User | null,
-    setLoginUser: (loginuser: User) => void;
+    setLoginUser: (loginUser: User) => void;
     resetLoginUser: () => void;
 }
 
 const useLoginUserStore = create<LoginUserStore>(set => ({
     loginUser: null,
-    setLoginUser: (loginuser) => set(state => ({...state, loginuser})),
+    setLoginUser: loginUser => set(state => ({...state, loginUser})),
     resetLoginUser: () => set(state => ({...state, loginUser: null}))
 }));
 

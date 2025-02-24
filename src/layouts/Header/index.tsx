@@ -28,7 +28,6 @@ export default function Header() {
     const [isBoardUpdatePage, setBoardUpdatePage] = useState<boolean>(false);
     const [isUserPage, setUserPage] = useState<boolean>(false);
 
-
     const navigator = useNavigate();
 
     const onLogoClickHandler = () => {
@@ -97,7 +96,8 @@ export default function Header() {
         }
 
         const onSignOutButtonClickHandler = () => {
-            resetLoginUser()
+            resetLoginUser();
+            setCookie('accessToken', '', { path: MAIN_PATH(), expires: new Date() })
             navigator(MAIN_PATH());
         }
 
@@ -144,6 +144,9 @@ export default function Header() {
         setUserPage(isUserPage);
     }, [pathname]);
 
+    useEffect(() => {
+        setLogin(loginUser !== null);
+    }, [loginUser]);
 
     return (
         <div id="header">
