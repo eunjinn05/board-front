@@ -12,6 +12,10 @@ import {
 import {useCookies} from "react-cookie";
 import LoginUserStore from "../../stores/login-user.store.ts";
 import useBoardStore from "../../stores/board.store.ts";
+import {fileUploadRequest, postBoardRequest} from "../../apis/index.ts";
+import {PostBoardRequestDto} from "../../apis/request/board";
+import {PostBoardResponseDto} from "../../apis/response/board";
+import {ResponseDto} from "../../apis/response";
 
 export default function Header() {
 
@@ -119,12 +123,39 @@ export default function Header() {
 
     const UploadButton = () => {
         const { title, content, boardImageFileList, resetBoard } = useBoardStore();
-        const onUploadButtonClickHandler = () => {
-            return;
+
+        const postBoardResponse = (responseBody: PostBoardResponseDto | ResponseDto | null) => {
+            if(!responseBody) return false;
+            const {code} = responseBody.code;
+            if(code === "DBE") alert("데이터베이스 오류입니다.");
+            if(code === 'AF' || code === 'NU') navigator(AUTH_PATH());
+            if(code === 'VF') alert('제목과 내용은 필수입니다.');
+            if(code === 'SU') return;
+
+            resetBoard();
+            if(!loginUser) return false;
+            const { email } = loginUser;
+            // navigator(USER_PATH(email));
+        }
+
+        const onUploadButtonClickHandler = async () => {
+            const accessToken = cookies.accessToken;
+            if(!accessToken) return false;
+
+            const boardImageList: string[] = [];
+            for (const file of boardImageFileList) {
+                const data = new FormData();
+                data.append('file', file);
+
+                const url = await fileUploadRequest(data);
+                if(url) boardImageList.push(url);
+            }
+            const requestBody: PostBoardRequestDto = {title, content, boardImageList}
+            postBoardRequest(requestBody,accessToken).then(postBoardResponse);
         }
 
         if (title && content)
-            return <div className="black-button" onClick={aa}>업로드</div>
+            return <div className="black-button" onClick={onUploadButtonClickHandler}>업로드</div>
         return <div className="disable-button">업로드</div>
     };
     useEffect(() => {
