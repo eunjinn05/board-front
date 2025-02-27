@@ -15,7 +15,8 @@ const FILE_DOMAIN = () => `${DOMAIN}/file`;
 const FILE_UPLOAD_URL = () => `${FILE_DOMAIN()}/upload`;
 const POST_BOARD_URL = () => `${API_DOMAIN}/board`;
 const GET_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`;
-const INCREASE_VIEW_COUNT_URL = (boardIdx : number | string) => `${API_DOMAIN}/board/${boardIdx}/increase-view-count`
+const INCREASE_VIEW_COUNT_URL = (boardIdx : number | string) => `${API_DOMAIN}/board/${boardIdx}/increase-view-count`;
+const GET_FAVORITE_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/favorite-list`;
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -96,12 +97,14 @@ export const getBoardRequest = async (boardIdx: number | string) => {
 }
 
 export const increaseViewCountRequest = async (boardIdx: number | string) => {
-    const result = await axios.patch(INCREASE_VIEW_COUNT_URL(boardIdx))
+    const result = await axios.get(INCREASE_VIEW_COUNT_URL(boardIdx))
         .then(response => {
             const responseBody: IncreaseBoardViewCountResponseDto = response.data;
+            return responseBody;
         }).catch(e => {
             if(!e.response) return null;
             const responseBody: ResponseDto = e.response.data;
             return responseBody;
         })
+    return result;
 }
