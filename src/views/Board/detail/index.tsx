@@ -11,8 +11,17 @@ import {useNavigate, useParams} from "react-router-dom";
 import {BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH} from "../../../constant/index.ts";
 import GetBoardResponseDto from "../../../apis/response/board/get-board.response.dto";
 import {ResponseDto} from "../../../apis/response";
-import {getBoardRequest, increaseViewCountRequest} from "../../../apis/index.ts";
-import {IncreaseBoardViewCountResponseDto} from "../../../apis/response/board";
+import {
+    getBoardRequest,
+    getCommentListRequest,
+    getFavoriteListRequest,
+    increaseViewCountRequest
+} from "../../../apis/index.ts";
+import {
+    GetCommentListResponseDto,
+    GetFavoriteListResponseDto,
+    IncreaseBoardViewCountResponseDto
+} from "../../../apis/response/board";
 import dayjs from 'dayjs';
 
 
@@ -21,6 +30,24 @@ export default function BoardDetail() {
     const { loginUser } = useLoginUserStore();
     const { boardIdx } = useParams();
     const navigator = useNavigate();
+
+
+    const increseViewCountResponse = (responseBody: IncreaseBoardViewCountResponseDto | ResponseDto | null) => {
+        if(!responseBody) return false;
+        const code = responseBody.code;
+        if(code === "NB") alert('존재하지 않는 게시물입니다.');
+        if(code === "DBE") alert("데이터베이스 오류입니다.");
+    }
+
+    let effectFlag = true;
+    useEffect(() => {
+        if(!boardIdx) return;
+        if(effectFlag) {
+            effectFlag = false;
+            return;
+        }
+        increaseViewCountRequest(boardIdx).then(increseViewCountResponse);
+    }, [boardIdx]);
 
 
     const BoardDetailTop = () => {
@@ -121,7 +148,7 @@ export default function BoardDetail() {
 
         const [favoriteList, setFavoriteList] = useState<FavoriteListItem[]>([]);
         const [commentList, setCommentList] = useState<CommentListItem[]>([]);
-        const [isFavorite, SetFavorite] = useState<boolean>(false);
+        const [isFavorite, setFavorite] = useState<boolean>(false);
         const [showFavorite, setShowFavorite] = useState<boolean>(false);
         const [showComment, setShowComment] = useState<boolean>(false);
         const [comment, setComment] = useState<string>('');
@@ -129,7 +156,7 @@ export default function BoardDetail() {
         const commentRef = useRef<HTMLTextAreaElement | null>(null);
 
         const onFavoriteClickHandler = () => {
-            SetFavorite(!isFavorite);
+            setFavorite(!isFavorite);
         }
         const onShowFavoriteClickHandler = () => {
             setShowFavorite(!showFavorite);
@@ -149,9 +176,37 @@ export default function BoardDetail() {
 
         }
 
+        const getFavoriteListResponse = (responseBody: GetFavoriteListResponseDto | ResponseDto | null) => {
+            if(!responseBody) return false;
+            const {code} = responseBody;
+            if(code === "NB") return false;
+            if(code === "DBE") return false;
+            if(code !== "SU") return false;
+
+            const {favoriteList} = responseBody as GetFavoriteListResponseDto;
+            setFavoriteList(favoriteList);
+            if(!loginUser) {
+                setFavorite(false);
+                return false;
+            }
+            const isFavorite = favoriteList.findIndex(f => f.email === loginUser.email) !== -1;
+            setFavorite(isFavorite);
+        }
+
+        const getCommentListResponse = (responseBody: GetCommentListResponseDto | ResponseDto | null) => {
+            if(!responseBody) return false;
+            const {code} = responseBody;
+            if(code === "NB") return false;
+            if(code === "DBE") return false;
+            if(code !== "SU") return false;
+            const {commentList} = responseBody as GetCommentListResponseDto;
+            setCommentList(commentList);
+        }
+
         useEffect(() => {
-            setFavoriteList(favoriteListMock);
-            setCommentList(commentListMock);
+            if(!boardIdx) return;
+            getFavoriteListRequest(boardIdx).then(getFavoriteListResponse);
+            getCommentListRequest(boardIdx).then(getCommentListResponse);
         }, [boardIdx]);
 
         return (
@@ -211,27 +266,9 @@ export default function BoardDetail() {
                         )}
                     </div>
                 )}
-
             </div>
         )
     }
-
-    const increseViewCountResponse = (responseBody: IncreaseBoardViewCountResponseDto | ResponseDto | null) => {
-        if(!responseBody) return false;
-        const code = responseBody.code;
-        if(code === "NB") alert('존재하지 않는 게시물입니다.');
-        if(code === "DBE") alert("데이터베이스 오류입니다.");
-    }
-
-    let effectFlag = true;
-    useEffect(() => {
-        if(!boardIdx) return;
-        if(effectFlag) {
-            effectFlag = false;
-            return;
-        }
-        increaseViewCountRequest(boardIdx).then(increseViewCountResponse);
-    }, [boardIdx]);
 
     return (
         <div id="board-detail-wrapper">

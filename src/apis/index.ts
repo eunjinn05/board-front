@@ -4,7 +4,12 @@ import {SignUpResponseDto} from "./response/auth";
 import {ResponseDto} from "./response";
 import {GetSignInUserResponseDto} from "./response/user";
 import {PostBoardRequestDto} from "./request/board";
-import {PostBoardResponseDto, GetBoardResponseDto, IncreaseBoardViewCountResponseDto,} from "./response/board";
+import {
+    PostBoardResponseDto,
+    GetBoardResponseDto,
+    IncreaseBoardViewCountResponseDto,
+    GetCommentListResponseDto,
+} from "./response/board";
 
 const DOMAIN = 'http://localhost:4000';
 const API_DOMAIN = `${DOMAIN}/api/v1`;
@@ -17,6 +22,7 @@ const POST_BOARD_URL = () => `${API_DOMAIN}/board`;
 const GET_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`;
 const INCREASE_VIEW_COUNT_URL = (boardIdx : number | string) => `${API_DOMAIN}/board/${boardIdx}/increase-view-count`;
 const GET_FAVORITE_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/favorite-list`;
+const GET_COMMENT_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/comment-list`;
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -108,3 +114,30 @@ export const increaseViewCountRequest = async (boardIdx: number | string) => {
         })
     return result;
 }
+
+export const getFavoriteListRequest = async (boardIdx: number | string) => {
+    const result = await axios.get(GET_FAVORITE_LIST_URL(boardIdx))
+        .then(response => {
+            const responseBody: GetBoardResponseDto = response.data;
+            return responseBody;
+        }).catch(error => {
+            if(!error.response) return null;
+            const responseBody: ResponseDto = error.response.data;
+            return responseBody;
+        });
+    return result;
+}
+
+export const getCommentListRequest = async (boardIdx: number | string) => {
+    const result = await axios.get(GET_COMMENT_LIST_URL(boardIdx))
+        .then(response => {
+            const responseBody: GetCommentListResponseDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
+
+
