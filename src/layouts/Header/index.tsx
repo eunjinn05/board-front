@@ -135,7 +135,7 @@ export default function Header() {
             resetBoard();
             if(!loginUser) return false;
             const { email } = loginUser;
-            // navigator(USER_PATH(email));
+            navigator(USER_PATH(email));
         }
 
         const onUploadButtonClickHandler = async () => {

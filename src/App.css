@@ -17,6 +17,14 @@
     background-color: rgba(0, 0, 0, 0.05);
 }
 
+.icon-box {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .icon {
     width: 100%;
     height: 100%;
@@ -143,4 +151,32 @@
 
 .close-icon {
     background-image: url("assets/image/close.png");
+}
+
+.more-icon {
+    background-image: url("assets/image/more.png");
+}
+
+.favorite-fill-icon {
+    background-image: url("assets/image/favorite-fill.png");
+}
+
+.favorite-light-icon {
+    background-image: url("assets/image/favorite-light.png");
+}
+
+.up-light-icon {
+    background-image: url("assets/image/expand-up-light.png");
+}
+
+.down-light-icon {
+    background-image: url("assets/image/expand-down-light.png");
+}
+
+.comment-icon {
+    background-image: url("assets/image/chat-light.png");
+}
+
+.emphasis {
+    font-weight: bolder;
 }

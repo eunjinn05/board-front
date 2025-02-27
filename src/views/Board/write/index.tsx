@@ -1,6 +1,6 @@
 import React, {ChangeEvent, useEffect, useRef, useState} from 'react';
 import './style.css';
-import {useBoardStore, useLoginUserStore} from "../../../stores/index.ts";
+import {useBoardStore} from "../../../stores/index.ts";
 import {useNavigate} from "react-router-dom";
 import {MAIN_PATH} from "../../../constant/index.ts";
 import {useCookies} from "react-cookie";

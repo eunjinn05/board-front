@@ -1,10 +1,10 @@
 import {SignInRequestDto, SignUpRequestDto} from "./request/auth";
-import axios from "axios";
+import axios, {request} from "axios";
 import {SignUpResponseDto} from "./response/auth";
 import {ResponseDto} from "./response";
 import {GetSignInUserResponseDto} from "./response/user";
 import {PostBoardRequestDto} from "./request/board";
-import {PostBoardResponseDto} from "./response/board";
+import {PostBoardResponseDto, GetBoardResponseDto, IncreaseBoardViewCountResponseDto,} from "./response/board";
 
 const DOMAIN = 'http://localhost:4000';
 const API_DOMAIN = `${DOMAIN}/api/v1`;
@@ -14,6 +14,8 @@ const GET_SIGN_IN_URL = () => `${API_DOMAIN}/user`;
 const FILE_DOMAIN = () => `${DOMAIN}/file`;
 const FILE_UPLOAD_URL = () => `${FILE_DOMAIN()}/upload`;
 const POST_BOARD_URL = () => `${API_DOMAIN}/board`;
+const GET_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`;
+const INCREASE_VIEW_COUNT_URL = (boardIdx : number | string) => `${API_DOMAIN}/board/${boardIdx}/increase-view-count`
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -80,4 +82,26 @@ export const postBoardRequest = async (requestBody: PostBoardRequestDto, accessT
     return result;
 }
 
+export const getBoardRequest = async (boardIdx: number | string) => {
+    const result = await axios.get(GET_BOARD_URL(boardIdx))
+        .then(response => {
+            const requestBody: GetBoardResponseDto = response.data;
+            return requestBody;
+        }). catch(e => {
+            if(!e.response) return null;
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
 
+export const increaseViewCountRequest = async (boardIdx: number | string) => {
+    const result = await axios.patch(INCREASE_VIEW_COUNT_URL(boardIdx))
+        .then(response => {
+            const responseBody: IncreaseBoardViewCountResponseDto = response.data;
+        }).catch(e => {
+            if(!e.response) return null;
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        })
+}

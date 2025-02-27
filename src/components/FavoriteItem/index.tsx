@@ -1,6 +1,6 @@
 import React from 'react';
-import {FavoriteListItem} from "../../types/interface";
-// @ts-ignore
+import './style.css';
+import {FavoriteListItem} from "../../types/interface/index.ts";
 import defaultProfileImage from '../../assets/image/default-profile-image.png';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function FavoriteItem({favoriteListItem}: Props) {
-    const {nickname, profileImage} = favoriteListItem;
+    const {profileImage, nickname} = favoriteListItem;
     return (
           <div className='favorite-list-item'>
               <div className='favorite-list-item-profile-box'>

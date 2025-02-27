@@ -1,11 +1,13 @@
-import BoardListItem from "./board-list-item.interface";
-import FavoriteListItem from "./favorite-list-item.interface";
-import CommentListItem from "./comment-list-item.interface";
-import User from './user.interface'
+import BoardListItem from "./board-list-item.interface.ts";
+import FavoriteListItem from "./favorite-list-item.interface.ts";
+import CommentListItem from "./comment-list-item.interface.ts";
+import User from './user.interface.ts'
+import Board from './board.interface.ts'
 
 export type {
     BoardListItem,
     FavoriteListItem,
     CommentListItem,
-    User
+    User,
+    Board
 }

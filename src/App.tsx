@@ -97,9 +97,9 @@ function App() {
                 <Route path={SEARCH_PATH(':searchWord')} element={<Search />}></Route>
                 <Route path={USER_PATH(':userEmail')} element={<UserP />}></Route>
                 <Route path={BOARD_PATH()}>
-                    <Route path={BOARD_DEATIL_PATH(':boardNumber')} element={<BoardDetail />} />
+                    <Route path={BOARD_DEATIL_PATH(':boardIdx')} element={<BoardDetail />} />
                     <Route path={BOARD_WRITE_PATH()} element={<BoardWrite />} />
-                    <Route path={BOARD_UPDATE_PATH(':boardNumber')} element={<BoardUpdate />} />
+                    <Route path={BOARD_UPDATE_PATH(':boardIdx')} element={<BoardUpdate />} />
                 </Route>
                 <Route path="*" element={<h1>404 Not Found</h1>} />
             </Route>

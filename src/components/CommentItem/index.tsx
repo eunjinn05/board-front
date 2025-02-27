@@ -1,7 +1,6 @@
 import React from 'react';
 import './style.css';
 import {CommentListItem} from "../../types/interface";
-// @ts-ignore
 import defaultProfileImage from '../../assets/image/default-profile-image.png';
 
 interface Props {
