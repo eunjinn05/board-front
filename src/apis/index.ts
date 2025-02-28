@@ -8,7 +8,7 @@ import {
     PostBoardResponseDto,
     GetBoardResponseDto,
     IncreaseBoardViewCountResponseDto,
-    GetCommentListResponseDto,
+    GetCommentListResponseDto, PutFavoriteResponseDto, PostCommentResponseDto
 } from "./response/board";
 
 const DOMAIN = 'http://localhost:4000';
@@ -23,6 +23,8 @@ const GET_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boar
 const INCREASE_VIEW_COUNT_URL = (boardIdx : number | string) => `${API_DOMAIN}/board/${boardIdx}/increase-view-count`;
 const GET_FAVORITE_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/favorite-list`;
 const GET_COMMENT_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/comment-list`;
+const PUT_FAVORITE_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/favorite`;
+const POST_COMMENT_URL = (boardIdx: number | string) =>`${API_DOMAIN}/board/${boardIdx}/comment`;
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -140,4 +142,27 @@ export const getCommentListRequest = async (boardIdx: number | string) => {
     return result;
 }
 
+export const putFavoriteRequest = async(boardIdx: number | string, accessToken: string) => {
+    const result = await axios.put(PUT_FAVORITE_URL(boardIdx), {}, authorization(accessToken))
+        .then(response => {
+            const responseBody: PutFavoriteResponseDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
+
+export const postCommentRequest = async(boardIdx: number | string, requestBody: PostCommentResponseDto, accessToken: string) => {
+    const result = await axios.post(POST_COMMENT_URL(boardIdx), requestBody, authorization(accessToken))
+        .then(response => {
+            const responseBody: PostCommentResponseDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
 

@@ -8,21 +8,22 @@ import Pagination from "../../../components/Pagination/index.tsx";
 import defaultProfileImage from "../../../assets/image/default-profile-image.png";
 import {useLoginUserStore} from "../../../stores/index.ts";
 import {useNavigate, useParams} from "react-router-dom";
-import {BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH} from "../../../constant/index.ts";
+import {AUTH_PATH, BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH} from "../../../constant/index.ts";
 import GetBoardResponseDto from "../../../apis/response/board/get-board.response.dto";
 import {ResponseDto} from "../../../apis/response";
 import {
     getBoardRequest,
     getCommentListRequest,
     getFavoriteListRequest,
-    increaseViewCountRequest
+    increaseViewCountRequest, postCommentRequest, putFavoriteRequest
 } from "../../../apis/index.ts";
 import {
     GetCommentListResponseDto,
     GetFavoriteListResponseDto,
-    IncreaseBoardViewCountResponseDto
+    IncreaseBoardViewCountResponseDto, PostCommentResponseDto, PutFavoriteResponseDto
 } from "../../../apis/response/board";
 import dayjs from 'dayjs';
+import {useCookies} from "react-cookie";
 
 
 export default function BoardDetail() {
@@ -30,7 +31,7 @@ export default function BoardDetail() {
     const { loginUser } = useLoginUserStore();
     const { boardIdx } = useParams();
     const navigator = useNavigate();
-
+    const [cookies, setCookies] = useCookies();
 
     const increseViewCountResponse = (responseBody: IncreaseBoardViewCountResponseDto | ResponseDto | null) => {
         if(!responseBody) return false;
@@ -155,8 +156,29 @@ export default function BoardDetail() {
 
         const commentRef = useRef<HTMLTextAreaElement | null>(null);
 
+        const putFavoriteResponse = (responseBody: PutFavoriteResponseDto | ResponseDto | null) => {
+            if(!responseBody) return false;
+            const {code} = responseBody;
+            if(code === 'VF') alert('잘못된 접근입니다.');
+            if(code === 'NU') alert('존재하지 않는 유저입니다.');
+            if(code === 'NB') alert('존재하지 않는 게시물입니다.');
+            if(code === 'AF') alert('인증에 실패하였습니다.');
+            if(code === 'DBE') alert('데이터베이스 오류입니다.');
+            if(code !== 'SU') return false;
+
+            if(!boardIdx) return false;
+            getFavoriteListRequest(boardIdx).then(getFavoriteListResponse);
+        }
+
         const onFavoriteClickHandler = () => {
-            setFavorite(!isFavorite);
+            if(!loginUser || !cookies.accessToken){
+                alert('로그인 후 이용해주세요');
+                navigator(AUTH_PATH());
+                return false;
+            }
+            if(!boardIdx) return false;
+            putFavoriteRequest(boardIdx, cookies.accessToken).then(putFavoriteResponse);
+
         }
         const onShowFavoriteClickHandler = () => {
             setShowFavorite(!showFavorite);
@@ -171,10 +193,30 @@ export default function BoardDetail() {
             commentRef.current.style.height = 'auto';
             commentRef.current.style.height = `${commentRef.current.scrollHeight}px`;
         }
+
         const onCommentSubmitButtonClickHandler = () => {
-            if(!comment) return false;
+            if(!comment || !boardIdx || !loginUser || !cookies.accessToken) return false;
+            const requestBody: PostCommentResponseDto = { content: comment};
+            postCommentRequest(boardIdx, requestBody, cookies.accessToken).then(postcommentResonse);
+        }
+
+        const postcommentResonse = (responseBody: PostCommentResponseDto | ResponseDto | null) => {
+            if(!responseBody) return false;
+
+            const {code} = responseBody;
+            if(code === 'VF') alert('잘못된 접근입니다.');
+            if(code === 'NU') alert('존재하지 않는 유저입니다.');
+            if(code === 'NB') alert('존재하지 않는 게시물입니다.');
+            if(code === 'AF') alert('인증에 실패하였습니다.');
+            if(code === 'DBE') alert('데이터베이스 오류입니다.');
+            if(code !== 'SU') return false;
+
+            if(!boardIdx) return false;
+            getCommentListRequest(boardIdx).then(getCommentListResponse);
+            setComment('');
 
         }
+
 
         const getFavoriteListResponse = (responseBody: GetFavoriteListResponseDto | ResponseDto | null) => {
             if(!responseBody) return false;
