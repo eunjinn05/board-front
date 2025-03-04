@@ -3,12 +3,16 @@ import axios, {request} from "axios";
 import {SignUpResponseDto} from "./response/auth";
 import {ResponseDto} from "./response";
 import {GetSignInUserResponseDto} from "./response/user";
-import {PostBoardRequestDto} from "./request/board";
+import {PatchBoardRequestDto, PostBoardRequestDto} from "./request/board";
 import {
     PostBoardResponseDto,
     GetBoardResponseDto,
     IncreaseBoardViewCountResponseDto,
-    GetCommentListResponseDto, PutFavoriteResponseDto, PostCommentResponseDto, DeleteBoardResponseDto
+    GetCommentListResponseDto,
+    PutFavoriteResponseDto,
+    PostCommentResponseDto,
+    DeleteBoardResponseDto,
+    PatchBoardResponseDto
 } from "./response/board";
 
 const DOMAIN = 'http://localhost:4000';
@@ -25,7 +29,8 @@ const GET_FAVORITE_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/fav
 const GET_COMMENT_LIST_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/comment-list`;
 const PUT_FAVORITE_URL = (boardIdx) => `${API_DOMAIN}/board/${boardIdx}/favorite`;
 const POST_COMMENT_URL = (boardIdx: number | string) =>`${API_DOMAIN}/board/${boardIdx}/comment`;
-const DELETE_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`
+const DELETE_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`;
+const PATCH_BOARD_URL = (boardIdx: number | string) => `${API_DOMAIN}/board/${boardIdx}`;
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -176,5 +181,18 @@ export const deleteBoardRequest = async (boardIdx: number | string, accessToken:
             const responseBody: ResponseDto = e.response.data;
             return responseBody;
         })
+    return result;
+}
+
+export const patchBoardRequest = async (boardIdx: number | string, requestBody: PatchBoardRequestDto, accessToken: string)=> {
+    const result = await axios.patch(PATCH_BOARD_URL(boardIdx), requestBody, authorization(accessToken))
+        .then(response => {
+            const responseBody: PatchBoardResponseDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            if(!e.response) return null;
+            const responseBody: ResponseDto = e.response.data;
+            return responseBody;
+        });
     return result;
 }
