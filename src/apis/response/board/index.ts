@@ -5,6 +5,7 @@ import GetFavoriteListResponseDto from "./get-favorite-list.response.dto";
 import GetCommentListResponseDto from "./get-comment-list.response.dto";
 import PutFavoriteResponseDto from "./put-favorite.response.dto";
 import PostCommentResponseDto from "./post-comment.response.dto";
+import DeleteBoardResponseDto from "./delete-board.response.dto";
 
 export type {
     PostBoardResponseDto,
@@ -13,5 +14,6 @@ export type {
     GetFavoriteListResponseDto,
     GetCommentListResponseDto,
     PutFavoriteResponseDto,
-    PostCommentResponseDto
+    PostCommentResponseDto,
+    DeleteBoardResponseDto
 }

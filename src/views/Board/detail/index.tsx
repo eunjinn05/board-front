@@ -12,18 +12,21 @@ import {AUTH_PATH, BOARD_PATH, BOARD_UPDATE_PATH, MAIN_PATH, USER_PATH} from "..
 import GetBoardResponseDto from "../../../apis/response/board/get-board.response.dto";
 import {ResponseDto} from "../../../apis/response";
 import {
+    deleteBoardRequest,
     getBoardRequest,
     getCommentListRequest,
     getFavoriteListRequest,
     increaseViewCountRequest, postCommentRequest, putFavoriteRequest
 } from "../../../apis/index.ts";
 import {
+    DeleteBoardResponseDto,
     GetCommentListResponseDto,
     GetFavoriteListResponseDto,
     IncreaseBoardViewCountResponseDto, PostCommentResponseDto, PutFavoriteResponseDto
 } from "../../../apis/response/board";
 import dayjs from 'dayjs';
 import {useCookies} from "react-cookie";
+import {usePagination} from "../../../hooks/index.ts";
 
 
 export default function BoardDetail() {
@@ -69,10 +72,23 @@ export default function BoardDetail() {
             if(loginUser.email !== board.writerEmail) return false;
             navigator(BOARD_PATH() + '/' + BOARD_UPDATE_PATH(board.boardIdx));
         }
-        const onDeleteButtonClickHandler = () => {
-            if(!board || !loginUser) return false;
-            if(loginUser.email !== board.writerEmail) return false;
+        const deleteBoardResponse = (responseBody: DeleteBoardResponseDto | ResponseDto | null) => {
+            if (!responseBody) return false;
+            const { code } = responseBody;
+            if(code === "VF") alert('잘못된 접근입니다.');
+            if(code === "NU") alert('존재하지 않는 유저입니다.');
+            if(code === "NB") alert('존재하지 않는 게시물입니다.');
+            if(code === "AF") alert('인증에 실패했습니다.');
+            if(code === "NP") alert('권한이 없습니다.');
+            if(code === "DBE") alert("데이터베이스 오류입니다.");
+            if(code !== "SU") return false;
             navigator(MAIN_PATH());
+        }
+        const onDeleteButtonClickHandler = () => {
+            if(!board || !loginUser || !boardIdx || !cookies.accessToken) return false;
+            if(loginUser.email !== board.writerEmail) return false;
+
+            deleteBoardRequest(boardIdx, cookies.accessToken).then(deleteBoardResponse);
         }
         const getWriteDatetimeFormat = () => {
             if(!board) return '';
@@ -148,13 +164,15 @@ export default function BoardDetail() {
     const BoardDetailBottom = () => {
 
         const [favoriteList, setFavoriteList] = useState<FavoriteListItem[]>([]);
-        const [commentList, setCommentList] = useState<CommentListItem[]>([]);
         const [isFavorite, setFavorite] = useState<boolean>(false);
         const [showFavorite, setShowFavorite] = useState<boolean>(false);
         const [showComment, setShowComment] = useState<boolean>(false);
         const [comment, setComment] = useState<string>('');
+        const [totalCommentCount, setTotalCommentCount] = useState<number>(0);
 
         const commentRef = useRef<HTMLTextAreaElement | null>(null);
+
+        const { currentPage, setCurrentPage, currentSection, setCurrentSection, viewPageList, totalSection, setTotalList, viewList } = usePagination<CommentListItem>(3);
 
         const putFavoriteResponse = (responseBody: PutFavoriteResponseDto | ResponseDto | null) => {
             if(!responseBody) return false;
@@ -178,7 +196,6 @@ export default function BoardDetail() {
             }
             if(!boardIdx) return false;
             putFavoriteRequest(boardIdx, cookies.accessToken).then(putFavoriteResponse);
-
         }
         const onShowFavoriteClickHandler = () => {
             setShowFavorite(!showFavorite);
@@ -217,7 +234,6 @@ export default function BoardDetail() {
 
         }
 
-
         const getFavoriteListResponse = (responseBody: GetFavoriteListResponseDto | ResponseDto | null) => {
             if(!responseBody) return false;
             const {code} = responseBody;
@@ -242,7 +258,8 @@ export default function BoardDetail() {
             if(code === "DBE") return false;
             if(code !== "SU") return false;
             const {commentList} = responseBody as GetCommentListResponseDto;
-            setCommentList(commentList);
+            setTotalList(commentList);
+            setTotalCommentCount(commentList.length);
         }
 
         useEffect(() => {
@@ -268,7 +285,7 @@ export default function BoardDetail() {
                         <div className="icon-button">
                             <div className="icon comment-icon"></div>
                         </div>
-                        <div className="board-detail-bottom-button-text">댓글 {commentList.length}</div>
+                        <div className="board-detail-bottom-button-text">댓글 {totalCommentCount}</div>
                         <div className="icon-button" onClick={onShowCommentClickHandler}>
                             {(showComment) ? <div className="icon up-light-icon"></div> : <div className="icon down-light-icon"></div>}
                         </div>
@@ -287,14 +304,14 @@ export default function BoardDetail() {
                 {showComment && (
                     <div className="board-detail-bottom-comment-box">
                         <div className="board-detail-bottom-comment-container">
-                            <div className="board-detail-bottom-comment-title">댓글 <span className="emphasis">{commentList.length}</span> </div>
+                            <div className="board-detail-bottom-comment-title">댓글 <span className="emphasis">{totalCommentCount}</span> </div>
                             <div className="board-detail-bottom-comment-list-container">
-                                {commentList.map(item => <CommentItem commentListItem={item}/>)}
+                                {viewList.map(item => <CommentItem commentListItem={item}/>)}
                             </div>
                         </div>
                         <div className="divider"></div>
                         <div className="board-detail-bottom-comment-pagination-box">
-                            <Pagination />
+                            <Pagination  currentPage={currentPage} currentSection={currentSection} totalSection={totalSection} setCurrentPage={setCurrentPage} setCurrentSection={setCurrentSection} viewPageList={viewPageList}/>
                         </div>
                         {loginUser !== null && (
                             <div className="board-detail-bottom-comment-input-box">

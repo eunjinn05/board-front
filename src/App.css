@@ -40,8 +40,12 @@
     background-image: url("assets/image/eye-light-on.png");
 }
 
-.expand-right-light-icon {
-    background-image: url("assets/image/expand-right-light.png");
+.expand-right-icon {
+    background-image: url("assets/image/expand-right.png");
+}
+
+.expand-left-icon {
+    background-image: url("assets/image/expand-left.png");
 }
 
 .logo-light-icon {
