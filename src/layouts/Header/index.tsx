@@ -42,7 +42,7 @@ export default function Header() {
         const [status, setStatus] = useState<boolean>(false);
         const [Word, setWord] = useState<String>('');
         const searchButtonRef = useRef<HTMLDivElement | null>(null);
-        const {searchWord} = useParams();
+        const {word} = useParams();
 
         const onSearchWordKeyDownHandler = (e:KeyboardEvent<HTMLInputElement>) => {
             if (e.key !== 'Enter') return;
@@ -64,11 +64,11 @@ export default function Header() {
         }
 
         useEffect(() => {
-            if(searchWord) {
-                setWord(searchWord);
+            if(word) {
+                setWord(word);
                 setStatus(true);
             }
-        }, [searchWord]);
+        }, [word]);
 
         if (!status) {
             return (
@@ -79,7 +79,7 @@ export default function Header() {
         } else {
             return (
                 <div className="header-search-input-box">
-                    <input className="header-search-input" type="text" placeholder="검색어를 입력하세요" value={searchWord} onChange={onSearchWordChangeHandler} onKeyDown={onSearchWordKeyDownHandler}/>
+                    <input className="header-search-input" type="text" placeholder="검색어를 입력하세요" value={word} onChange={onSearchWordChangeHandler} onKeyDown={onSearchWordKeyDownHandler}/>
                     <div ref={searchButtonRef} className="icon-button" onClick={onSearchButtonClickHandler}>
                         <div className="icon search-light-icon"></div>
                     </div>
