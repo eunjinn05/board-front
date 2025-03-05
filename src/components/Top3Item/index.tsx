@@ -2,24 +2,26 @@ import React from 'react'
 import './style.css'
 import defaultProfileImage from '../../assets/image/default-profile-image.png';
 import {BoardListItem} from "../../types/interface/index.ts";
+import {useNavigate} from "react-router-dom";
+import {BOARD_DEATIL_PATH, BOARD_PATH} from "../../constant/index.ts";
 
 interface Props {
     top3ListItem : BoardListItem
 }
 
 export default function Top3Item({top3ListItem}: Props) {
-    const {board_int, title, content, boardTitleImage} = top3ListItem;
+    const {boardIdx, title, content, boardTitleImage} = top3ListItem;
     const {favoriteCount, commentCount, viewCount} = top3ListItem;
-    const {reg_date, writerNickname, writerProfileImage} = top3ListItem;
+    const {regDate, writerNickname, writerProfileImage} = top3ListItem;
 
-    // const navigator = useNavigate();
+    const navigator = useNavigate();
 
     const onClickHandler = () => {
-        // navigator(board_int)
+        navigator(BOARD_PATH() + '/' + BOARD_DEATIL_PATH(boardIdx))
     }
 
     return (
-        <div className='top-3-list-item' style={{backgroundImage: `url(${boardTitleImage})`}}>
+        <div className='top-3-list-item' style={{backgroundImage: `url(${boardTitleImage})`}} onClick={onClickHandler}>
             <div className='top-3-list-item-main-box'>
                 <div className='top-3-list-item-top'>
                     <div className='top-3-list-item-profile-box'>
@@ -27,7 +29,7 @@ export default function Top3Item({top3ListItem}: Props) {
                     </div>
                     <div className='top-3-list-item-write-box'>
                         <div className='top-3-list-item-nickname'>{writerNickname}</div>
-                        <div className='top-3-list-item-write-date'>{reg_date}</div>
+                        <div className='top-3-list-item-write-date'>{regDate}</div>
                     </div>
                 </div>
                 <div className='top-3-list-item-middle'>
