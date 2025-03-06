@@ -6,7 +6,7 @@ export default interface BoardListItem {
     favoriteCount: number;
     commentCount: number;
     viewCount: number;
-    regDate: string;
+    regDateTime: string;
     writerNickname: string;
     writerProfileImage: String | null;
 }

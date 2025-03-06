@@ -2,7 +2,7 @@ import {SignInRequestDto, SignUpRequestDto} from "./request/auth";
 import axios from "axios";
 import {SignUpResponseDto} from "./response/auth";
 import {ResponseDto} from "./response";
-import {GetSignInUserResponseDto} from "./response/user";
+import {GetSignInUserResponseDto, GetUserResponseDto} from "./response/user";
 import {PatchBoardRequestDto, PostBoardRequestDto} from "./request/board";
 import {
     PostBoardResponseDto,
@@ -13,10 +13,14 @@ import {
     PostCommentResponseDto,
     DeleteBoardResponseDto,
     PatchBoardResponseDto,
-    GetLatestBoardListResponseDto, GetTop3BoardListResponseDto, GetSearchBoardListResponseDto
+    GetLatestBoardListResponseDto,
+    GetTop3BoardListResponseDto,
+    GetSearchBoardListResponseDto,
+    GetUserBoardListResponseDto
 } from "./response/board";
 
 import {GetPopularListResponseDto, GetRelationListResponseDto} from "./response/search";
+import {PatchNicknameRequestDto, PatchProfileImageRequestDto} from "./request/user";
 
 const DOMAIN = 'http://localhost:4000';
 const API_DOMAIN = `${DOMAIN}/api/v1`;
@@ -39,6 +43,10 @@ const GET_TOP_3_BOARD_LIST_URL = () => `${API_DOMAIN}/board/top-3`;
 const GET_POPULAR_BOARD_LIST_URL = () => `${API_DOMAIN}/search/popular-list`;
 const GET_SEARCH_BOARD_LIST_URL = (searchWord: string, preSearchWord: string | null) => `${API_DOMAIN}/board/search-list/${searchWord}${preSearchWord ? '/' + preSearchWord : ''}`
 const GET_RELATION_LIST_URL = (searchWord: string) => `${API_DOMAIN}/search/${searchWord}/relation-list`
+const GET_USER_BOARD_LIST_URL = (email: string) => `${API_DOMAIN}/board/user-board-list/${email}`;
+const GET_USER_URL = (email: string) => `${API_DOMAIN}/user/${email}`;
+const PATCH_NICKNAME_URL = () => `${API_DOMAIN}/user/nickname`;
+const PATCH_PROFILE_IMAGE_URL = () => `${API_DOMAIN}/user/profile-image`;
 
 const authorization = (accessToken: string) => {return { headers: {Authorization: `Bearer ${accessToken}`}} };
 
@@ -265,3 +273,52 @@ export const getRelationListRequest = async (searchWord) => {
         });
     return result;
 }
+
+export const getUserBoardListRequest = async (email: string) => {
+    const result = await axios.get(GET_USER_BOARD_LIST_URL(email))
+        .then(response => {
+            const responseBody: GetUserBoardListResponseDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto | null = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
+
+export const getUserRequest = async (email: string) => {
+    const result = await axios.get(GET_USER_URL(email))
+        .then(response => {
+            const responseBody: GetUserResponseDto = response.data;
+            return responseBody
+        }).catch(e => {
+            const responseBody: ResponseDto | null = e.response.data;
+            return responseBody;
+        });
+    return result;
+}
+
+export const patchNicknameRequest = async (requestBody: PatchNicknameRequestDto, accessToken:string) => {
+    const result = await axios.patch(PATCH_NICKNAME_URL(), requestBody, authorization(accessToken))
+        .then(response => {
+            const responseBody: PatchNicknameRequestDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto | null = e.response.data;
+            return responseBody;
+        });
+    return result;
+}
+
+export const patchProfileImageRequest = async (requestBody: PatchProfileImageRequestDto, accessToken: string) => {
+    const result = await axios.patch(PATCH_PROFILE_IMAGE_URL(), requestBody, authorization(accessToken))
+        .then(response => {
+            const responseBody: PatchProfileImageRequestDto = response.data;
+            return responseBody;
+        }).catch(e => {
+            const responseBody: ResponseDto | null = e.response.data;
+            return responseBody;
+        })
+    return result;
+}
+

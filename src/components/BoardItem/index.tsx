@@ -13,7 +13,9 @@ export default function BoardItem({boardListItem} : Props) {
 
     const { boardIdx, title, content, boardTitleImage } = boardListItem;
     const { favoriteCount, commentCount, viewCount } = boardListItem;
-    const { regDate, writerNickname, writerProfileImage} = boardListItem;
+    const { regDateTime, writerNickname, writerProfileImage} = boardListItem;
+
+    console.log(writerNickname);
 
 
     const navigator = useNavigate();
@@ -26,11 +28,11 @@ export default function BoardItem({boardListItem} : Props) {
             <div className='board-list-item-main-box'>
                 <div className='board-list-item-top'></div>
                     <div className='board-list-item-profile-box'>
-                        <div className='board-list-item-profile-image' style={{backgroundImage: `url(${writerProfileImage} ? ${writerProfileImage} : ${DefaultProfileImage}`}}></div>
+                        <div className='board-list-item-profile-image' style={{backgroundImage: `url(${writerProfileImage ? writerProfileImage : DefaultProfileImage}`}}></div>
                     </div>
                     <div className='board-list-item-write-box'>
                         <div className='board-list-item-nickname'>{writerNickname}</div>
-                        <div className='board-list-item-reg_date'>{regDate}</div>
+                        <div className='board-list-item-reg_date'>{regDateTime}</div>
                     </div>
                 <div className='board-list-item-middle'>
                     <div className='board-list-item-title'>{title}</div>
